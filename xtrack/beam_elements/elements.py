@@ -2431,6 +2431,44 @@ class SecondOrderTaylorMap(BeamElement):
             out.T[:, :, kk] *= scale_factors[kk]
 
         return out
+    
+
+class ACDipole(BeamElement):
+    isthick = False
+
+    # _extra_c_sources = [
+    #     _pkg_root.joinpath('beam_elements/elements_src/')]
+
+    _xofields = {
+        'voltage': xo.Float64,
+        'frequency': xo.Float64,
+        'lag': xo.Float64,
+        'ramp': xo.Int64[4]
+        }
+    
+    def __init__(self, voltage=None, frequency=None, lag=None, ramp=None, **kwargs):
+        if '_xobject' in kwargs and kwargs['_xobject'] is not None:
+            self.xoinitialize(**kwargs)
+            return
+        
+        super().__init__(**kwargs)
+        kwargs["voltage"] = voltage
+        kwargs["frequency"] = frequency
+        kwargs["lag"] = lag
+        kwargs["ramp"] = ramp
+        
+
+    @property
+    def voltage(self):
+        return self.voltage
+    
+    @property
+    def frequency(self):
+        return self.frequency
+    
+    @property
+    def lag(self):
+        return self.lag
 
 class ThinSliceNotNeededError(Exception):
     pass

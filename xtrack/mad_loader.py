@@ -1394,4 +1394,23 @@ class MadLoader:
             knll=mad_elem.knll,
             cnll=mad_elem.cnll,
         )
-        return self.make_composite_element([el], mad_elem)
+        return self.make_composite_element([el], mad_elem)    
+
+
+    def convert_hacdipole(self, mad_elem):
+        ramp = np.zeros(4, dtype=object)
+
+        for i in range(4):
+            att_name = f'ramp{i+1}'
+            if hasattr(mad_elem, att_name):
+                ramp[i] = getattr(mad_elem, att_name)
+
+        el = self.Builder(
+            mad_elem.name,
+            self.classes.ACDipole,
+            voltage=mad_elem.volt,
+            lag=mad_elem.lag,
+            frequency=mad_elem.freq,
+            ramp=ramp
+        )
+        return self.make_compound_elem([el], mad_elem)
