@@ -407,10 +407,10 @@ class Alignment:
             and hasattr(mad_el, "align_errors")
             and mad_el.align_errors is not None
         ):
-            if bv != 1:
-                raise NotImplementedError("Alignment errors not supported for bv=-1")
+            # if bv != 1:
+                # raise NotImplementedError("Alignment errors not supported for bv=-1")
             self.align_errors = mad_el.align_errors
-            self.dx = self.align_errors.dx
+            self.dx = self.align_errors.dx * self.bv
             self.dy = self.align_errors.dy
             self.tilt += self.align_errors.dpsi
         self.classes = classes
@@ -501,10 +501,10 @@ class MadLoader:
             else:
                 allow_thick = True
 
-        if allow_thick and enable_field_errors:
-            raise NotImplementedError(
-                "Field errors are not yet supported for thick elements"
-            )
+        # if allow_thick and enable_field_errors:
+        #     raise NotImplementedError(
+        #         "Field errors are not yet supported for thick elements"
+        #     )
 
         if expressions_for_element_types is not None:
             assert enable_expressions, ("Expressions must be enabled if "
@@ -1407,10 +1407,29 @@ class MadLoader:
 
         el = self.Builder(
             mad_elem.name,
-            self.classes.ACDipole,
+            self.classes.HACDipole,
             voltage=mad_elem.volt,
-            lag=mad_elem.lag,
             frequency=mad_elem.freq,
-            ramp=ramp
+            lag=mad_elem.lag,
+            ramp=ramp,
+        )
+        return self.make_compound_elem([el], mad_elem)
+    
+
+    def convert_vacdipole(self, mad_elem):
+        ramp = np.zeros(4, dtype=object)
+
+        for i in range(4):
+            att_name = f'ramp{i+1}'
+            if hasattr(mad_elem, att_name):
+                ramp[i] = getattr(mad_elem, att_name)
+
+        el = self.Builder(
+            mad_elem.name,
+            self.classes.VACDipole,
+            voltage=mad_elem.volt,
+            frequency=mad_elem.freq,
+            lag=mad_elem.lag,
+            ramp=ramp,
         )
         return self.make_compound_elem([el], mad_elem)

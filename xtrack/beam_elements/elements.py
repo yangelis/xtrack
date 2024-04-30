@@ -2433,11 +2433,15 @@ class SecondOrderTaylorMap(BeamElement):
         return out
     
 
-class ACDipole(BeamElement):
+class HACDipole(BeamElement):
+    '''Beam element modeling a thin AC Dipole:
+    '''
     isthick = False
+    # has_backtrack = True
 
-    # _extra_c_sources = [
-    #     _pkg_root.joinpath('beam_elements/elements_src/')]
+    _extra_c_sources = [
+        _pkg_root.joinpath('beam_elements/elements_src/hacdipole.h')
+        ]
 
     _xofields = {
         'voltage': xo.Float64,
@@ -2446,17 +2450,28 @@ class ACDipole(BeamElement):
         'ramp': xo.Int64[4]
         }
     
-    def __init__(self, voltage=None, frequency=None, lag=None, ramp=None, **kwargs):
-        if '_xobject' in kwargs and kwargs['_xobject'] is not None:
+    def __init__(self, voltage  = 0.0, 
+                       frequency= 0.0, 
+                       lag      = 0.0, 
+                       ramp     = None,
+                       **kwargs):
+        
+        if '_xobject' in kwargs.keys() and kwargs['_xobject'] is not None:
             self.xoinitialize(**kwargs)
             return
         
-        super().__init__(**kwargs)
         kwargs["voltage"] = voltage
         kwargs["frequency"] = frequency
         kwargs["lag"] = lag
         kwargs["ramp"] = ramp
-        
+        if ramp is None:
+            kwargs["ramp"] = np.zeros(4, dtype=np.int64)
+        else:
+            if len(np.shape(ramp)) == 1 and np.shape(ramp)[0] == 4:
+                kwargs["ramp"] = ramp
+            else:
+                raise ValueError(f'Wrong shape for ramp: {np.shape(ramp)}')
+        super().__init__(**kwargs)        
 
     @property
     def voltage(self):
@@ -2469,6 +2484,67 @@ class ACDipole(BeamElement):
     @property
     def lag(self):
         return self.lag
+    
+    @property
+    def ramp(self):
+        return self.ramp
+    
+
+class VACDipole(BeamElement):
+    '''Beam element modeling a thin AC Dipole:
+    '''
+    isthick = False
+    # has_backtrack = True
+
+    _extra_c_sources = [
+        _pkg_root.joinpath('beam_elements/elements_src/vacdipole.h')
+        ]
+
+    _xofields = {
+        'voltage': xo.Float64,
+        'frequency': xo.Float64,
+        'lag': xo.Float64,
+        'ramp': xo.Int64[4]
+        }
+    
+    def __init__(self, voltage  = 0.0, 
+                       frequency= 0.0, 
+                       lag      = 0.0, 
+                       ramp     = None,
+                       **kwargs):
+        
+        if '_xobject' in kwargs.keys() and kwargs['_xobject'] is not None:
+            self.xoinitialize(**kwargs)
+            return
+        
+        kwargs["voltage"] = voltage
+        kwargs["frequency"] = frequency
+        kwargs["lag"] = lag
+        kwargs["ramp"] = ramp
+        if ramp is None:
+            kwargs["ramp"] = np.zeros(4, dtype=np.int64)
+        else:
+            if len(np.shape(ramp)) == 1 and np.shape(ramp)[0] == 4:
+                kwargs["ramp"] = ramp
+            else:
+                raise ValueError(f'Wrong shape for ramp: {np.shape(ramp)}')
+        super().__init__(**kwargs)        
+
+    @property
+    def voltage(self):
+        return self.voltage
+    
+    @property
+    def frequency(self):
+        return self.frequency
+    
+    @property
+    def lag(self):
+        return self.lag
+    
+    @property
+    def ramp(self):
+        return self.ramp
 
 class ThinSliceNotNeededError(Exception):
     pass
