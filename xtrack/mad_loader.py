@@ -501,10 +501,10 @@ class MadLoader:
             else:
                 allow_thick = True
 
-        # if allow_thick and enable_field_errors:
-        #     raise NotImplementedError(
-        #         "Field errors are not yet supported for thick elements"
-        #     )
+        if allow_thick and enable_field_errors:
+            raise NotImplementedError(
+                "Field errors are not yet supported for thick elements"
+            )
 
         if expressions_for_element_types is not None:
             assert enable_expressions, ("Expressions must be enabled if "
@@ -1413,7 +1413,7 @@ class MadLoader:
             lag=mad_elem.lag,
             ramp=ramp,
         )
-        return self.make_compound_elem([el], mad_elem)
+        return self.make_composite_element([el], mad_elem)
     
 
     def convert_vacdipole(self, mad_elem):
@@ -1432,4 +1432,4 @@ class MadLoader:
             lag=mad_elem.lag,
             ramp=ramp,
         )
-        return self.make_compound_elem([el], mad_elem)
+        return self.make_composite_element([el], mad_elem)
